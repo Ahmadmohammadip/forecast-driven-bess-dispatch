@@ -242,6 +242,28 @@ def daily_issue_times(
     return pd.DatetimeIndex([t for t in candidates if earliest <= t <= latest])
 
 
+def periodic_issue_times(
+    frame: pd.DataFrame,
+    horizon: int = 24,
+    spec: FeatureSpec | None = None,
+    step_hours: int = 1,
+) -> pd.DatetimeIndex:
+    """Issue times every `step_hours`, for a rolling controller.
+
+    A model trained only on 00:00 issues learns `horizon_step` as a proxy for
+    hour-of-day, since at that issue time the two are identical. Serving it at
+    13:00 then breaks the association silently. Training across issue hours
+    keeps the feature meaning what it says.
+    """
+    spec = spec or FeatureSpec()
+    step = pd.Timedelta(hours=1)
+    earliest = frame.index[0] + step * spec.max_lookback_hours
+    latest = frame.index[-1] - step * (horizon - 1)
+    if earliest > latest:
+        return pd.DatetimeIndex([])
+    return pd.date_range(earliest, latest, freq=f"{step_hours}h")
+
+
 def feature_names(
     target: str, spec: FeatureSpec | None = None, horizon: int = 24
 ) -> list[str]:

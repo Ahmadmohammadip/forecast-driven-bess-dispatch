@@ -41,7 +41,11 @@ from bess_dispatch.forecasting.models import build_forecaster
 from bess_dispatch.forecasting.selection import BEST_BY_TARGET
 from bess_dispatch.optimization.builder import build_dispatch_model, build_no_battery_model
 from bess_dispatch.optimization.rules import rule_based_schedule
-from bess_dispatch.optimization.solve import evaluate_schedule, solve_dispatch
+from bess_dispatch.optimization.solve import (
+    evaluate_schedule,
+    soc_settlement_eur,
+    solve_dispatch,
+)
 
 TARGETS = ("load_mw", "pv_mw", "price_eur_mwh")
 
@@ -201,6 +205,11 @@ def run_benchmark(
                     "throughput_mwh": scored["throughput_mwh"],
                     "wholesale_energy_cost_eur": scored["wholesale_energy_cost_eur"],
                     "terminal_soc_mwh": scored["terminal_soc_mwh"],
+                    "mean_import_price_eur_mwh": float(
+                        day_site.tariff_policy.apply(
+                            truth.price_eur_mwh
+                        ).import_price_eur_mwh.mean()
+                    ),
                     "clipped_periods": scored["clipped_periods"],
                     "mean_soc_mwh": float(schedule.soc_mwh.mean()),
                     "solve_time_s": schedule.solve_time_s,
@@ -212,12 +221,16 @@ def run_benchmark(
 
     results = pd.DataFrame(records)
     results.attrs["skipped_days"] = skipped
+    results.attrs["initial_soc_mwh"] = site.battery.initial_soc_mwh
+    results.attrs["battery"] = site.battery
     results.attrs["objective"] = objective
     results.attrs["split"] = split
     return results
 
 
-def summarise_benchmark(results: pd.DataFrame, baseline_arm: str = "no battery") -> pd.DataFrame:
+def summarise_benchmark(
+    results: pd.DataFrame, baseline_arm: str = "no battery"
+) -> pd.DataFrame:
     """Totals per arm, plus savings against the no-battery baseline.
 
     `value_captured` is the share of the perfect-foresight saving that an arm
@@ -235,6 +248,26 @@ def summarise_benchmark(results: pd.DataFrame, baseline_arm: str = "no battery")
             "mean_solve_s": grouped["solve_time_s"].mean(),
         }
     )
+
+    # Settle the state of charge each arm ends the whole run on, once. An arm
+    # that finishes depleted has taken energy it never paid for; over 60 days
+    # the rule-based controller's entire apparent saving is exactly that.
+    battery = results.attrs.get("battery")
+    if battery is not None:
+        initial = results.attrs["initial_soc_mwh"]
+        last = results.sort_values("issue_time").groupby("arm").tail(1).set_index("arm")
+        settlement = {
+            arm: soc_settlement_eur(
+                initial,
+                float(last.loc[arm, "terminal_soc_mwh"]),
+                battery,
+                float(last.loc[arm, "mean_import_price_eur_mwh"]),
+            )
+            for arm in table.index
+        }
+        table["soc_settlement_eur"] = pd.Series(settlement)
+        table["terminal_soc_mwh"] = last["terminal_soc_mwh"]
+        table["total_cost_eur"] = table["total_cost_eur"] + table["soc_settlement_eur"]
 
     baseline = table.loc[baseline_arm, "total_cost_eur"]
     table["saving_eur"] = baseline - table["total_cost_eur"]

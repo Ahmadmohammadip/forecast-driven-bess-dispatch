@@ -165,6 +165,36 @@ def _explain_failure(condition, model: ConcreteModel, solver_name: str) -> str:
     return f"solver {solver_name!r} terminated with {condition}, not an optimal solution"
 
 
+def soc_settlement_eur(
+    initial_soc_mwh: float,
+    terminal_soc_mwh: float,
+    battery,
+    reference_price_eur_mwh: float,
+) -> float:
+    """Charge (or credit) a run for ending at a different state of charge.
+
+    Without this, any controller that ends depleted has been handed free
+    energy, and the longer it runs the more it takes. It is the same defect
+    that made the rule-based arm appear to capture 309% of the
+    perfect-foresight saving when state of charge reset daily; at the end of a
+    run it reappears once, and once is enough to matter -- the rule-based arm's
+    entire 36.71 EUR saving over 60 days is within a rounding error of the 0.4
+    MWh it ends short.
+
+    Ending *short* costs what it would take to refill: the deficit grossed up
+    by charge efficiency. Ending *long* is credited at what the surplus would
+    yield on discharge. Both are valued at one reference price rather than a
+    marginal one, because the settlement is a boundary artefact and pricing it
+    cleverly would just move the arbitrariness somewhere less visible.
+
+    Returns a cost: positive means the run owes energy back.
+    """
+    delta = terminal_soc_mwh - initial_soc_mwh
+    if delta < 0:
+        return -delta / battery.charge_efficiency * reference_price_eur_mwh
+    return -delta * battery.discharge_efficiency * reference_price_eur_mwh
+
+
 def evaluate_schedule(
     result: DispatchResult,
     actuals: TimeSeriesData,
