@@ -40,6 +40,14 @@ dev = [
     "pytest>=8.0",
     "ruff>=0.5",
 ]
+notebooks = [
+    # Only needed to re-execute notebooks/. Not required to use the package,
+    # and deliberately kept out of the CI install.
+    "jupyter>=1.0",
+    "nbformat>=5.9",
+    "nbconvert>=7.10",
+    "ipykernel>=6.29",
+]
 
 [project.urls]
 Repository = "https://github.com/Ahmadmohammadip/forecast-driven-bess-dispatch"
