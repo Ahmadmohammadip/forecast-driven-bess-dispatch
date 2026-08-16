@@ -9,5 +9,4 @@ venv/
 
 # The raw OPSD snapshot is 130 MB and reproducible via data/download_opsd.py
 data/raw/
-results/*.csv
-results/*.json
+# results/ holds small reproducible evidence tables and IS tracked.
