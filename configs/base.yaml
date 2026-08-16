@@ -1,0 +1,74 @@
+# Reference case.
+#
+# The battery sizing is the brief's own recommendation (section 5), kept rather
+# than replaced with something more flattering. It is worth about 3.5% of the
+# energy bill on this site; larger batteries do better, and the sizing sweep in
+# configs/scenarios/ shows by how much. Reporting the brief's number and the
+# curve is more useful than reporting whichever size looked best.
+#
+# These are simulation assumptions, not claims about real equipment.
+
+name: baseline
+
+battery:
+  name: Batt1
+  energy_capacity_mwh: 1.0
+  p_charge_max_mw: 0.5
+  p_discharge_max_mw: 0.5
+  charge_efficiency: 0.95
+  discharge_efficiency: 0.95
+  soc_min_frac: 0.10
+  soc_max_frac: 0.90
+  initial_soc_frac: 0.50
+  # EUR per MWh of throughput. An economic proxy for wear, not an
+  # electrochemical model -- it knows nothing about cycle depth, temperature,
+  # calendar ageing or C-rate. 2 EUR/MWh is a round number chosen to be visible
+  # against a median daily price spread of 28.7 EUR/MWh without dominating it.
+  degradation_cost_eur_mwh: 2.0
+
+grid:
+  # Twice peak load, so the connection is not the binding constraint. Scenarios
+  # that tighten it are where import limits start to matter.
+  import_limit_mw: 2.0
+  export_limit_mw: 2.0
+
+tariff:
+  # Delivered import price is wholesale + markup: network charges, levies,
+  # taxes, supplier margin. Everything that is not the energy itself.
+  #
+  # 60 EUR/MWh is in the right range for a German commercial site, and it also
+  # has to clear a hard floor. With export paid at 70% of wholesale, a markup
+  # below 27 EUR/MWh makes the tariff arbitrageable during the 484
+  # negative-price hours in this record: importing pays you 90 EUR/MWh while
+  # exporting costs you 63, netting +27 forever with no battery involved.
+  # Tariff validation rejects that outright -- see schema.Tariff.
+  import_markup_eur_mwh: 60.0
+  export_ratio: 0.70
+  # EUR per MW of peak grid import over the horizon. Applied per day here,
+  # because the horizon is a day; a real monthly demand charge would need a
+  # monthly horizon, which is noted as a limitation.
+  demand_charge_eur_mw: 5.0
+
+# All three of the brief's objective variants are built. This selects the one
+# used for headline numbers; docs/formulation.md reports all three.
+objective: cost_degradation_demand
+
+horizon: 24
+dt_hours: 1.0
+
+# Require the horizon to end where it started. Without it a finite horizon ends
+# by selling the battery empty, and the reported cost is flattered by energy
+# that was never paid for.
+enforce_terminal_soc: true
+
+split: test
+
+# Chosen by validation-window comparison, not by reputation -- gradient
+# boosting wins on load and loses to a naive baseline on PV. See
+# docs/forecasting.md.
+models:
+  load_mw: gradient_boosting
+  pv_mw: ridge
+  price_eur_mwh: ridge
+
+seed: 20260816

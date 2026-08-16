@@ -204,6 +204,12 @@ def evaluate_schedule(
         )
         * dt
     )
+    # The same import volume priced at bare wholesale, with no markup. The
+    # battery can only move the wholesale component -- network charges and
+    # levies ride along with every MWh regardless of when it is taken -- so
+    # savings expressed against the whole bill understate what the controller
+    # is actually doing. Both denominators are reported.
+    wholesale_cost = float(np.sum(actuals.price_eur_mwh * grid_import) * dt)
     degradation = float(
         battery.degradation_cost_eur_mwh * np.sum(charge + discharge) * dt
     )
@@ -223,7 +229,9 @@ def evaluate_schedule(
         "realised_energy_cost_eur": energy_cost,
         "realised_degradation_eur": degradation,
         "realised_demand_charge_eur": demand_charge,
+        "wholesale_energy_cost_eur": wholesale_cost,
         "peak_import_mw": peak,
+        "terminal_soc_mwh": float(soc[-1]) if soc.size else battery.initial_soc_mwh,
         "grid_import_mwh": float(grid_import.sum() * dt),
         "grid_export_mwh": float(grid_export.sum() * dt),
         "curtailed_mwh": float(curtailed.sum() * dt),
