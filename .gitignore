@@ -1,0 +1,13 @@
+__pycache__/
+*.pyc
+.venv/
+venv/
+*.egg-info/
+.pytest_cache/
+.ruff_cache/
+.ipynb_checkpoints/
+
+# The raw OPSD snapshot is 130 MB and reproducible via data/download_opsd.py
+data/raw/
+results/*.csv
+results/*.json

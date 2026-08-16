@@ -1,0 +1,58 @@
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "bess-dispatch"
+version = "0.1.0"
+description = "Forecast-driven behind-the-meter BESS dispatch: ML forecasts of load, PV and price feeding a Pyomo cost-minimizing dispatch LP"
+readme = "README.md"
+requires-python = ">=3.11"
+license = { text = "MIT" }
+authors = [{ name = "Ahmad" }]
+keywords = [
+    "optimization", "energy-storage", "battery", "pyomo", "forecasting",
+    "machine-learning", "rolling-horizon", "behind-the-meter",
+]
+
+dependencies = [
+    "pyomo>=6.7",
+    "numpy>=1.26",
+    "pandas>=2.1",
+    "scikit-learn>=1.4",
+    "pyyaml>=6.0",
+]
+
+[project.optional-dependencies]
+solvers = [
+    "highspy>=1.7",
+]
+viz = [
+    "matplotlib>=3.8",
+    "streamlit>=1.35",
+]
+boost = [
+    # Only used if it measurably beats HistGradientBoostingRegressor on the
+    # held-out window -- see docs/forecasting.md for whether it did.
+    "xgboost>=2.0",
+]
+dev = [
+    "pytest>=8.0",
+    "ruff>=0.5",
+]
+
+[project.urls]
+Repository = "https://github.com/Ahmadmohammadip/forecast-driven-bess-dispatch"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.ruff]
+line-length = 100
+target-version = "py311"
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "UP", "B"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
