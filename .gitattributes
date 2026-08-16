@@ -1,0 +1,4 @@
+# The prepared dataset must round-trip byte for byte so that re-running
+# download_opsd.py + prepare_dataset.py reproduces exactly what is committed.
+# Without this, autocrlf rewrites it on Windows checkout and the checksum moves.
+data/processed/*.csv -text
