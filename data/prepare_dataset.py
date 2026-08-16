@@ -118,9 +118,11 @@ def prepare(raw_path: Path = DEFAULT_RAW, out_path: Path = DEFAULT_OUT) -> pd.Da
     out_path.parent.mkdir(parents=True, exist_ok=True)
     out.to_csv(out_path, lineterminator="\n")
     print(f"\nwrote {out_path}  ({len(out)} rows, {out_path.stat().st_size / 1e6:.2f} MB)")
-    print(f"  complete rows (no NaN, not imputed): {int((out.notna().all(axis=1) & ~out['is_imputed']).sum())}")
-    print(f"  price EUR/MWh  min {out['price_eur_mwh'].min():.1f}  max {out['price_eur_mwh'].max():.1f}"
-          f"  negative hours {int((out['price_eur_mwh'] < 0).sum())}")
+    clean = int((out.notna().all(axis=1) & ~out["is_imputed"]).sum())
+    price = out["price_eur_mwh"]
+    print(f"  complete rows (no NaN, not imputed): {clean}")
+    print(f"  price EUR/MWh  min {price.min():.1f}  max {price.max():.1f}"
+          f"  negative hours {int((price < 0).sum())}")
     print(f"  load MW        min {out['load_mw'].min():.3f}  max {out['load_mw'].max():.3f}")
     print(f"  pv MW          min {out['pv_mw'].min():.3f}  max {out['pv_mw'].max():.3f}")
     return out
