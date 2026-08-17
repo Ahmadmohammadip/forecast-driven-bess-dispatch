@@ -1,0 +1,8 @@
+# A pure energy-arbitrage tariff, with no charge on peak import.
+#
+# Isolates how much of the reference result comes from peak management rather
+# than from arbitrage.
+extends: base.yaml
+name: no_demand_charge
+tariff:
+  demand_charge_eur_mw: 0.0

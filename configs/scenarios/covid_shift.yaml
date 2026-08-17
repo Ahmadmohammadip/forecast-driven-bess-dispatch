@@ -1,0 +1,9 @@
+# Not in the brief: the COVID-era distribution shift, held out of the headline.
+#
+# European load and prices break structurally in March 2020. Folding that into
+# the test window would confound forecast quality with a once-in-a-decade
+# shock, so it is examined on its own -- a forecaster meeting a regime change
+# with no retraining is a real thing that happens.
+extends: base.yaml
+name: covid_shift
+split: shift

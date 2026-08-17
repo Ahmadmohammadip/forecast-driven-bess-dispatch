@@ -1,0 +1,10 @@
+# Brief section 16, scenario 9: a different battery capacity.
+#
+# Energy and power scale together, which is how batteries are actually
+# procured -- a 4 MWh unit does not ship with a 0.5 MW inverter.
+extends: base.yaml
+name: large_battery
+battery:
+  energy_capacity_mwh: 4.0
+  p_charge_max_mw: 2.0
+  p_discharge_max_mw: 2.0

@@ -1,0 +1,11 @@
+# Brief section 16, scenario 6: higher electricity prices.
+#
+# Modelled through the tariff rather than by scaling the price series, because
+# the two are different questions. Scaling wholesale changes the arbitrage
+# opportunity; raising the markup changes only the bill. This file does the
+# latter -- see evaluation/scenarios.py for the series-scaling variants, which
+# are swept rather than configured.
+extends: base.yaml
+name: high_prices
+tariff:
+  import_markup_eur_mwh: 110.0

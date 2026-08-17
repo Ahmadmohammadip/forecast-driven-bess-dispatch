@@ -1,0 +1,9 @@
+# Brief section 11, objective variant 1: minimise energy cost alone.
+#
+# Worth running because it misbehaves in an instructive way. With nothing
+# penalising the peak, the optimizer happily charges into it: on the reference
+# case this variant pushes peak import ABOVE the no-battery peak. A single
+# objective would have hidden that.
+extends: base.yaml
+name: cost_only
+objective: cost

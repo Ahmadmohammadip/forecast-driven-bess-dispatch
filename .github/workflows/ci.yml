@@ -1,0 +1,58 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python-version: ["3.11", "3.12"]
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+          cache: pip
+
+      # The dispatch model is a pure LP, so HiGHS via the highspy wheel is the
+      # only solver needed -- no conda, no Ipopt, no MILP branch-and-bound.
+      # The `boost` extra (xgboost) is deliberately not installed: it is
+      # justified on one series of three, and CI should exercise the default
+      # install that most people get.
+      - name: Install package
+        run: pip install -e ".[dev,solvers,viz]"
+
+      - name: Lint with ruff
+        run: ruff check src tests app data notebooks
+
+      # The suite runs entirely on the seeded synthetic generator, so it never
+      # touches the network and never needs the 130 MB OPSD snapshot. The few
+      # tests that assert something about the committed dataset skip cleanly if
+      # it is absent.
+      - name: Run tests
+        run: pytest -v
+
+      - name: Streamlit app syntax smoke test
+        run: python -m py_compile app/streamlit_app.py
+
+      # Cheap guard against the pipeline breaking without a test noticing:
+      # imports resolve, config parses, and a site builds.
+      - name: Import and config smoke test
+        run: |
+          python -c "
+          from bess_dispatch.config import load_config, available_scenarios
+          from bess_dispatch import run
+          base = load_config()
+          assert base.site().battery.energy_capacity_mwh > 0
+          for path in available_scenarios():
+              load_config(path).site()
+          print(f'{len(available_scenarios())} scenarios parsed')
+          "

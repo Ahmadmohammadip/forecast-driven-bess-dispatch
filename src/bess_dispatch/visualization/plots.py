@@ -48,7 +48,7 @@ def plot_dispatch_day(
         1,
         figsize=(10, 6.6),
         sharex=True,
-        gridspec_kw={"height_ratios": [2.1, 1], "hspace": 0.12},
+        gridspec_kw={"height_ratios": [2.1, 1]},
     )
 
     ax_power.bar(
@@ -123,7 +123,7 @@ def plot_forecast_vs_perfect(
 
     fig, (ax_price, ax_power) = plt.subplots(
         2, 1, figsize=(10, 6.4), sharex=True,
-        gridspec_kw={"height_ratios": [1, 1.25], "hspace": 0.14},
+        gridspec_kw={"height_ratios": [1, 1.25]},
     )
 
     ax_price.plot(
@@ -349,7 +349,7 @@ def plot_rolling_trace(rolling, hours: int = 168) -> plt.Figure:
 
     fig, (ax_power, ax_soc) = plt.subplots(
         2, 1, figsize=(11, 5.8), sharex=True,
-        gridspec_kw={"height_ratios": [2, 1], "hspace": 0.12},
+        gridspec_kw={"height_ratios": [2, 1]},
     )
     ax_power.fill_between(
         index, 0, rolling.discharge_mw[:n], color=COLOR_DISCHARGE, alpha=0.85,
