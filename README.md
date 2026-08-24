@@ -344,7 +344,7 @@ dependence.
 
 ## Companion repos
 
-Six standalone optimization models built to the same conventions — validated
+Seven standalone optimization models built to the same conventions — validated
 dataclasses that fail loudly at construction, a builder that never touches raw
 files, and a result dataclass rather than a live model — but sharing no code.
 
@@ -370,6 +370,11 @@ files, and a result dataclass rather than a live model — but sharing no code.
   **The closest sibling to this repo**: here the state is a battery's
   charge and the hard part is predicting price; there the state is a
   building's temperature and the hard part is identifying the physics.
+- [resilient-microgrid-optimization](https://github.com/Ahmadmohammadip/resilient-microgrid-optimization)
+  — a MILP that operates a distribution feeder through a 72-hour extreme
+  event: which lines to close, which sections to energise, what to dispatch
+  and what to shed, subject to a radiality constraint that is enforced
+  mathematically rather than asserted.
 
 ## License
 
