@@ -344,7 +344,7 @@ dependence.
 
 ## Companion repos
 
-Seven standalone optimization models built to the same conventions — validated
+Eight standalone optimization models built to the same conventions — validated
 dataclasses that fail loudly at construction, a builder that never touches raw
 files, and a result dataclass rather than a live model — but sharing no code.
 
@@ -375,6 +375,15 @@ files, and a result dataclass rather than a live model — but sharing no code.
   event: which lines to close, which sections to energise, what to dispatch
   and what to shed, subject to a radiality constraint that is enforced
   mathematically rather than asserted.
+- [llm-energy-optimization-copilot](https://github.com/Ahmadmohammadip/llm-energy-optimization-copilot)
+  — natural-language energy requests turned into a validated structured
+  intent, solved by a deterministic Pyomo optimizer and explained from the
+  numbers it produced — with the LLM confined to interpretation and never
+  reaching a solver except through a schema that has to accept it first.
+  **The closest sibling to this repo**: here the question is what a forecast
+  is worth; there it is what a language model is worth. Both are answered by
+  scoring against a deterministic control arm rather than by checking that the
+  clever component runs.
 
 ## License
 
